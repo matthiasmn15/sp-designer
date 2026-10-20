@@ -34,7 +34,7 @@ Status: initial survey, 2026-10-20.
 
 **Findings**
 - Pt, Pd, Rh and Ni prices are readily available via free APIs.
-- **Ir and Ru** are thinly traded; free API coverage is uncertain → manual input will likely be needed.
+- **Ir and Ru** are thinly traded and missing from most free APIs; Umicore PMM publishes indicative prices for them.
 - Prices are in USD per troy ounce; conversion to €/g (or user-chosen currency) is needed.
 
 **Recommendation**
