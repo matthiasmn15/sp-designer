@@ -81,6 +81,7 @@ async function init() {
   fillChartSelectors();
   renderSets();
   renderAll();
+  applyRoute(location.hash);
 }
 
 function defaultWeights() {
@@ -128,12 +129,12 @@ function setTheme(theme) {
 }
 
 function bindStatic() {
+  $$(".main-tab").forEach((b) => b.addEventListener("click", () => navigate(b.dataset.page)));
   $$(".tab").forEach((tab) => tab.addEventListener("click", () => {
-    if (tab.classList.contains("disabled")) { toast("Electrode design follows in the next milestone."); return; }
-    $$(".tab").forEach((t) => t.classList.toggle("active", t === tab));
-    $$(".panel").forEach((p) => { p.hidden = p.id !== `tab-${tab.dataset.tab}`; });
-    if (tab.dataset.tab === "charts") renderCharts();
+    const page = tab.closest("[data-subnav]").dataset.subnav;
+    navigate(page, tab.dataset.tab);
   }));
+  window.addEventListener("hashchange", () => applyRoute(location.hash));
   $("#explainToggle").addEventListener("change", (e) => document.body.classList.toggle("explain", e.target.checked));
   $("#helpBtn").addEventListener("click", () => $("#helpDialog").showModal());
   $("#expandAll").addEventListener("click", () => { state.collapsed.clear(); persistCollapsed(); renderTable(); });
@@ -162,6 +163,31 @@ function bindStatic() {
   $("#setDelete").addEventListener("click", deleteSet);
 }
 
+// ---------------------------------------------------------------- navigation (#page/subpage)
+const DEFAULT_SUB = { materials: "compare" };
+function navigate(page, sub) {
+  const hash = `#${page}${sub || DEFAULT_SUB[page] ? `/${sub || DEFAULT_SUB[page]}` : ""}`;
+  if (location.hash !== hash) location.hash = hash; else applyRoute(hash);
+}
+function applyRoute(hash) {
+  const [pageRaw, subRaw] = (hash || "").replace(/^#/, "").split("/");
+  const page = $(`.main-tab[data-page="${pageRaw}"]`) ? pageRaw : "materials";
+  $$(".main-tab").forEach((b) => b.classList.toggle("active", b.dataset.page === page));
+  $$(".page").forEach((p) => { p.hidden = p.dataset.page !== page; });
+  $$("[data-subnav]").forEach((n) => { n.hidden = n.dataset.subnav !== page; });
+  $$(".materials-only").forEach((el) => { el.hidden = page !== "materials"; });
+  $$(".export-group").forEach((el) => { el.hidden = !["materials", "design"].includes(page); });
+  document.body.dataset.page = page;
+  if (page === "design" && window.designPage) window.designPage.show();
+  const nav = $(`[data-subnav="${page}"]`);
+  if (nav) {
+    const sub = $(`.tab[data-tab="${subRaw}"]`, nav) ? subRaw : DEFAULT_SUB[page];
+    $$(".tab", nav).forEach((t) => t.classList.toggle("active", t.dataset.tab === sub));
+    $$(`.page[data-page="${page}"] .panel`).forEach((p) => { p.hidden = p.id !== `tab-${sub}`; });
+    if (sub === "charts") renderCharts();
+  }
+}
+
 function persistCollapsed() { save("spd.collapsed", [...state.collapsed]); }
 function persistSlots() { save("spd.slots", state.slots); }
 function activeSlots() {
@@ -169,6 +195,7 @@ function activeSlots() {
 }
 
 function exportComparison(format) {
+  if (document.body.dataset.page === "design" && window.designPage) { window.designPage.exportDesigns(format); return; }
   const ids = activeSlots().map((s) => s.id);
   if (!ids.length) { toast("Select at least one material in A–D."); return; }
   window.location.href = `/api/export?format=${format}&ids=${encodeURIComponent(ids.join(","))}`;
@@ -500,7 +527,7 @@ function chartMaterials(category) {
 }
 
 function renderCharts() {
-  if ($("#tab-charts").hidden || !state.props.length || !$("#barProp").value) return;
+  if ($("#tab-charts").offsetParent === null || !state.props.length || !$("#barProp").value) return;
   if (!window.Plotly) {
     $("#barChart").innerHTML = $("#mapChart").innerHTML = `<div class="empty-chart">Charts need the Plotly library. Install it with: pip install plotly</div>`;
     return;

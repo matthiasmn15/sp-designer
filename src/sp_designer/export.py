@@ -65,3 +65,76 @@ def _write(ws, rows: list[list]) -> None:
     for idx, column in enumerate(ws.columns, start=1):
         width = max(len(str(c.value)) if c.value is not None else 0 for c in column)
         ws.column_dimensions[get_column_letter(idx)].width = min(max(width + 2, 10), 60)
+
+
+# ---------------------------------------------------------------- electrode designs
+def design_rows(designs: list, results: list) -> list[list]:
+    """Wide table: one column per design variant."""
+    from .design.models import PLUG_TYPE_LABELS
+
+    def r(v, digits=3):
+        return None if v is None else round(v, digits)
+
+    def el(d, side, key):
+        e = getattr(d, side)
+        relevant = {
+            "multi_pad": {"width", "height", "thickness"},
+            "j_gap": {"width", "height", "thickness"} if e.shape == "rect" else {"diameter", "thickness"},
+            "annular": ({"diameter", "length", "thickness"} if side == "center" else {"length", "thickness"}),
+        }[d.type]
+        return getattr(e, key) if key in relevant else None
+
+    rows: list[list] = [["Group", "Parameter", "Unit", *[d.name for d in designs]]]
+    spec = [
+        ("General", "Spark plug type", "", lambda d, x: PLUG_TYPE_LABELS[d.type]),
+        ("General", "Initial gap", "mm", lambda d, x: d.gap),
+        ("General", "Number of gaps", "–", lambda d, x: x.n_gaps),
+        ("General", "Ground ring segments", "–", lambda d, x: d.ground_segments if d.type == "annular" else None),
+        ("General", "Ground ring coverage", "%", lambda d, x: d.ground_coverage if d.type == "annular" else None),
+    ]
+    for side, label in (("center", "Centre electrode"), ("ground", "Ground electrode")):
+        spec += [
+            (label, "Precious metal", "", lambda d, x, s=side: getattr(d, s).material_id),
+            (label, "Pad shape", "", lambda d, x, s=side: getattr(d, s).shape if d.type == "j_gap" else
+             ("rect" if d.type == "multi_pad" else "cylindrical")),
+            (label, "Width", "mm", lambda d, x, s=side: el(d, s, "width")),
+            (label, "Height", "mm", lambda d, x, s=side: el(d, s, "height")),
+            (label, "Diameter", "mm", lambda d, x, s=side: el(d, s, "diameter")),
+            (label, "Axial length", "mm", lambda d, x, s=side: el(d, s, "length")),
+            (label, "Precious metal thickness", "mm", lambda d, x, s=side: el(d, s, "thickness")),
+            (label, "Carrier", "", lambda d, x, s=side: getattr(d, s).carrier_id),
+            (label, "Cu core", "", lambda d, x, s=side: "yes" if getattr(d, s).cu_core else "no"),
+            (label, "Facing area per gap", "mm²", lambda d, x, s=side: r(getattr(x, s).face_area)),
+            (label, "Precious metal volume", "mm³", lambda d, x, s=side: r(getattr(x, s).pm_volume)),
+            (label, "Wearable volume", "mm³", lambda d, x, s=side: r(getattr(x, s).wearable_volume)),
+            (label, "Precious metal mass", "mg", lambda d, x, s=side: r(getattr(x, s).pm_mass, 2)),
+            (label, "Precious metal cost", "USD", lambda d, x, s=side: r(getattr(x, s).pm_cost, 2)),
+        ]
+    spec += [
+        ("Results", "Common (wear) area per gap", "mm²", lambda d, x: r(x.common_area)),
+        ("Results", "Total wear area", "mm²", lambda d, x: r(x.total_wear_area)),
+        ("Results", "Ground ring inner diameter", "mm", lambda d, x: r(x.ground_inner_diameter)),
+        ("Results", "Precious metal volume (plug)", "mm³", lambda d, x: r(x.pm_volume)),
+        ("Results", "Precious metal mass (plug)", "mg", lambda d, x: r(x.pm_mass, 2)),
+        ("Results", "Precious metal cost (plug)", "USD", lambda d, x: r(x.pm_cost, 2)),
+        ("Results", "Warnings", "", lambda d, x: " | ".join(x.warnings) or None),
+    ]
+    for group, label, unit, fn in spec:
+        rows.append([group, label, unit, *[fn(d, x) for d, x in zip(designs, results)]])
+    return rows
+
+
+def rows_to_csv(rows: list[list]) -> str:
+    buf = io.StringIO()
+    csv.writer(buf, delimiter=";").writerows(rows)
+    return buf.getvalue()
+
+
+def rows_to_xlsx(rows: list[list], title: str) -> bytes:
+    wb = Workbook()
+    ws = wb.active
+    ws.title = title
+    _write(ws, rows)
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()

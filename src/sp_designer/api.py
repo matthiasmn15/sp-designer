@@ -13,7 +13,10 @@ from pydantic import BaseModel, Field
 
 from . import __version__
 from .config import user_data_dir
-from .export import to_csv, to_xlsx
+from .design.geometry import evaluate as evaluate_design
+from .design.library import DesignLibrary
+from .design.models import PLUG_TYPE_LABELS, Design, DesignResult
+from .export import design_rows, rows_to_csv, rows_to_xlsx, to_csv, to_xlsx
 from .materials.database import MaterialDatabase, make_id
 from .materials.models import Category, Material, MaterialDef, PropertyInput
 from .materials.properties import PROPERTIES, PropertyDef
@@ -48,6 +51,16 @@ class ManualPrice(BaseModel):
     source: str | None = None
 
 
+class EvaluatedDesign(BaseModel):
+    design: Design
+    result: DesignResult
+
+
+class DesignExport(BaseModel):
+    designs: list[Design] = Field(min_length=1, max_length=8)
+    format: Literal["csv", "xlsx"] = "csv"
+
+
 class PriceRow(BaseModel):
     metal: str
     usd_per_ozt: float
@@ -65,6 +78,7 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
     prices = PriceStore(data_dir)
     settings = SettingsStore(data_dir)
     state = {"db": MaterialDatabase(data_dir, prices)}
+    designs = DesignLibrary(data_dir)
 
     def db() -> MaterialDatabase:
         return state["db"]
@@ -204,6 +218,43 @@ def create_app(data_dir: Path | None = None) -> FastAPI:
             prices.add(entry)
         reload()
         return {"provider": name, "updated": [e.metal for e in result.entries], "errors": result.errors}
+
+    # -- electrode designs ---------------------------------------------------
+    @app.get("/api/design-types")
+    def design_types() -> dict[str, str]:
+        return PLUG_TYPE_LABELS
+
+    @app.post("/api/designs/evaluate", response_model=list[EvaluatedDesign])
+    def evaluate_designs(body: list[Design]) -> list[EvaluatedDesign]:
+        return [EvaluatedDesign(design=d, result=evaluate_design(d, db())) for d in body]
+
+    @app.get("/api/designs", response_model=list[Design])
+    def list_designs() -> list[Design]:
+        return designs.all()
+
+    @app.post("/api/designs", response_model=Design, status_code=201)
+    def save_design(body: Design) -> Design:
+        return designs.save(body)
+
+    @app.delete("/api/designs/{design_id}", status_code=204)
+    def delete_design(design_id: str) -> Response:
+        try:
+            designs.delete(design_id)
+        except KeyError:
+            raise HTTPException(404, f"unknown design '{design_id}'") from None
+        return Response(status_code=204)
+
+    @app.post("/api/designs/export")
+    def export_designs(body: DesignExport) -> Response:
+        results = [evaluate_design(d, db()) for d in body.designs]
+        rows = design_rows(body.designs, results)
+        stamp = date.today().isoformat()
+        if body.format == "csv":
+            return Response(rows_to_csv(rows), media_type="text/csv; charset=utf-8", headers={
+                "Content-Disposition": f'attachment; filename="electrode-designs-{stamp}.csv"'})
+        return Response(rows_to_xlsx(rows, "Designs"), headers={
+            "Content-Disposition": f'attachment; filename="electrode-designs-{stamp}.xlsx"'},
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     # -- settings ------------------------------------------------------------
     @app.get("/api/settings", response_model=Settings)

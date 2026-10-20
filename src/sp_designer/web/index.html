@@ -7,15 +7,16 @@
   <link rel="stylesheet" href="/static/app.css">
   <script src="/vendor/plotly.min.js" charset="utf-8" defer></script>
   <script src="/static/app.js" defer></script>
+  <script src="/static/design.js" defer></script>
 </head>
 <body>
 <header class="topbar">
   <div class="brand">
     <div class="logo"><b>SPARK</b>DESIGN</div>
-    <ul class="slot-summary" id="slotSummary"></ul>
+    <ul class="slot-summary materials-only" id="slotSummary"></ul>
   </div>
   <div class="toolbar">
-    <div class="tool-group">
+    <div class="tool-group materials-only">
       <span class="tool-label">Comparison set</span>
       <div class="tool-box">
         <select id="setSelect" aria-label="Comparison set"></select>
@@ -23,7 +24,7 @@
         <button class="icon-btn" id="setDelete" title="Delete set">🗑</button>
       </div>
     </div>
-    <div class="tool-group">
+    <div class="tool-group export-group">
       <span class="tool-label">Export</span>
       <div class="tool-box">
         <button class="btn" id="exportCsv">CSV</button>
@@ -50,16 +51,23 @@
 
 <div class="notice" id="notice" hidden></div>
 
-<nav class="tabs" id="tabs">
+<nav class="main-nav" id="mainNav">
+  <button class="main-tab active" data-page="materials"><span class="step">1</span>Materials</button>
+  <button class="main-tab" data-page="design"><span class="step">2</span>Electrode design</button>
+  <button class="main-tab" data-page="lifetime"><span class="step">3</span>Lifetime</button>
+  <button class="main-tab" data-page="spark"><span class="step">4</span>Spark simulation</button>
+</nav>
+
+<nav class="tabs" data-subnav="materials">
   <button class="tab active" data-tab="compare">Compare</button>
   <button class="tab" data-tab="ranking">Ranking</button>
   <button class="tab" data-tab="charts">Charts</button>
   <button class="tab" data-tab="database">Database</button>
   <button class="tab" data-tab="prices">Prices</button>
-  <button class="tab disabled" data-tab="design" title="Next milestone">Electrode design</button>
 </nav>
 
 <main>
+<div class="page" data-page="materials">
   <!-- COMPARE -->
   <section class="panel" id="tab-compare">
     <div class="card">
@@ -206,9 +214,75 @@
     </div>
   </section>
 
-  <section class="panel" id="tab-design" hidden>
-    <div class="card"><h2>Electrode design</h2><p class="hint">Next milestone.</p></div>
-  </section>
+</div>
+
+<!-- ELECTRODE DESIGN -->
+<div class="page" data-page="design" hidden>
+  <div class="card">
+    <div class="card-head">
+      <h2>Design variants <span id="dSlotLetters">A / B / C / D</span></h2>
+      <div class="head-actions">
+        <button class="btn outline" id="dExpandAll">Expand all</button>
+        <button class="btn outline" id="dCollapseAll">Collapse all</button>
+        <button class="btn outline" id="dDiffOnly">Differences only (0)</button>
+        <button class="btn outline" id="dLibrary">Library</button>
+      </div>
+    </div>
+    <div class="slots" id="designSlots"></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Parameters &amp; results</h2></div>
+    <div class="table-wrap"><table class="ptable" id="designTable"></table></div>
+    <p class="hint">All lengths in mm. Pads are assumed to be centred on a common axis. If the facing areas of centre
+      and ground electrode differ, the <b>smallest common area</b> is used for wear. <i>Wearable volume</i> is the
+      precious metal inside the common wear area (common area × thickness × number of gaps).</p>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <h2>Facing areas</h2>
+      <div class="legend"><span class="lg lg-c"></span>centre electrode <span class="lg lg-g"></span>ground electrode
+        <span class="lg lg-x"></span>common wear area</div>
+    </div>
+    <div class="sketches" id="designSketches"></div>
+  </div>
+</div>
+
+<!-- LIFETIME (milestone 3) -->
+<div class="page" data-page="lifetime" hidden>
+  <div class="card planned">
+    <div class="card-head"><h2>Lifetime</h2><span class="pill-planned">Milestone 3</span></div>
+    <div class="planned-grid">
+      <div><h3>Inputs</h3><ul>
+        <li>Combinations of electrode designs and materials</li>
+        <li>Wear per cycle per material, separately for centre and ground electrode
+          (manual now – entered under <i>Materials → Database</i>; calculated later)</li>
+        <li>Ignition voltage vs. gap – manual table for now</li>
+        <li>Available voltage, reserve, engine speed, operating hours</li></ul></div>
+      <div><h3>Results</h3><ul>
+        <li>Gap growth and ignition voltage over operating hours</li>
+        <li>Re-gap interval (voltage limit) and lifetime (wear limit)</li>
+        <li>Remaining precious metal at end of life, cost per operating hour</li></ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- SPARK SIMULATION (milestone 4 / research) -->
+<div class="page" data-page="spark" hidden>
+  <div class="card planned">
+    <div class="card-head"><h2>Spark simulation</h2><span class="pill-planned">Milestone 4 / research</span></div>
+    <div class="planned-grid">
+      <div><h3>0-D model</h3><ul>
+        <li>Ignition coil secondary circuit and energy balance</li>
+        <li>Breakdown voltage (Paschen-type, calibratable)</li>
+        <li>Voltage and current traces, energy per phase</li></ul></div>
+      <div><h3>1-D model (research)</h3><ul>
+        <li>Spark channel stretching by flow</li>
+        <li>Restrikes and short circuits</li>
+        <li>Energy to the electrodes → input for the wear model</li></ul></div>
+    </div>
+    <p class="hint">See <code>docs/research/spark-simulation.md</code> for the model survey.</p>
+  </div>
+</div>
 </main>
 
 <!-- dialogs -->
@@ -262,17 +336,26 @@
 
 <dialog id="helpDialog" class="dialog">
   <form method="dialog">
-    <h2>Spark Plug Designer – Materials</h2>
+    <h2>Spark Plug Designer</h2>
     <ul class="help">
-      <li><b>Compare</b>: pick up to four materials (A–D) and compare all properties side by side.</li>
-      <li><b>Ranking</b>: weight the selection criteria; materials are scored within the candidate set.</li>
-      <li><b>Charts</b>: bar chart per property and a selection map (e.g. erosion indicator vs. cost per volume).</li>
-      <li><b>Database</b>: add own materials and alloys, override reference values.</li>
-      <li><b>Prices</b>: automatic indicative prices with date stamp, or manual entries.</li>
+      <li><b>1 Materials</b> – <i>Compare</i> up to four materials (A–D), <i>Ranking</i> with weighted criteria,
+        <i>Charts</i>, <i>Database</i> (own materials, overrides, wear per cycle) and <i>Prices</i>.</li>
+      <li><b>2 Electrode design</b> – spark plug types, precious metal and thickness per electrode (next milestone).</li>
+      <li><b>3 Lifetime</b> – re-gap interval and lifetime for design/material combinations (planned).</li>
+      <li><b>4 Spark simulation</b> – 0-D/1-D spark models (planned / research).</li>
       <li>Pure-element data is imported automatically from the bundled <i>mendeleev</i> database.
         Alloy properties without datasheet values are estimated from the composition.</li>
     </ul>
     <p class="hint" id="helpInfo"></p>
+    <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
+  </form>
+</dialog>
+
+<dialog id="libraryDialog" class="dialog">
+  <form method="dialog">
+    <h2>Design library</h2>
+    <p class="hint">Saved designs are stored in your local data folder and will be available for the lifetime calculation.</p>
+    <div class="table-wrap"><table class="dtable" id="libraryTable"></table></div>
     <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
   </form>
 </dialog>

@@ -47,10 +47,20 @@ PROPERTIES: list[PropertyDef] = [
                 description="Derived: ρ·(c_p·(T_m − 25 °C) + h_f). Energy needed to melt 1 mm³ from room temperature; "
                             "indicator for melt-erosion resistance in the energy-based erosion model. "
                             "Uses room-temperature c_p and ignores oxidation."),
+    PropertyDef(key="wear_center", label="Wear per cycle – centre electrode", unit="µm³/cycle",
+                group="Spark behaviour", direction="lower", decimals=1,
+                description="Volume loss per ignition cycle (one spark per cycle) when the material is used on the "
+                            "centre electrode. Manual input from endurance tests for now; to be calculated by the "
+                            "wear model later. Used by the lifetime calculation."),
+    PropertyDef(key="wear_ground", label="Wear per cycle – ground electrode", unit="µm³/cycle",
+                group="Spark behaviour", direction="lower", decimals=1,
+                description="Volume loss per ignition cycle (one spark per cycle) when the material is used on the "
+                            "ground electrode. Differs from the centre electrode because of polarity. Manual input "
+                            "for now; to be calculated by the wear model later."),
     PropertyDef(key="erosion_coefficient", label="Erosion coefficient K", unit="–", group="Spark behaviour",
                 direction="lower", decimals=6,
                 description="Calibrated material factor of the energy-based erosion model "
-                            "(volume loss = K · E / (ρ · Δh_melt)). Set from endurance-test calibration."),
+                            "(volume loss = K · E / (ρ · Δh_melt)). Reserved for the later calculated wear model."),
     PropertyDef(key="oxidation_resistance", label="Oxidation resistance", unit="1–5", group="Spark behaviour",
                 kind="rating", direction="higher", default_weight=2, decimals=0,
                 description="Qualitative rating at electrode operating temperature (1 = poor, 5 = excellent)."),
