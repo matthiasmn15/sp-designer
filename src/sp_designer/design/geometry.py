@@ -64,14 +64,19 @@ def evaluate(design: Design, db: MaterialDatabase) -> DesignResult:
     else:  # annular
         n = 1
         inner_d = c.diameter + 2 * design.gap
+        cov = design.ground_coverage / 100.0  # share of the circumference covered by ground segments
         overlap_len = min(c.length, g.length)
         face_c = math.pi * c.diameter * c.length
-        face_g = math.pi * inner_d * g.length
-        common = math.pi * c.diameter * overlap_len  # the centre surface is the smaller one
+        face_g = math.pi * inner_d * g.length * cov
+        # smallest common area: centre surface over the overlapping length, facing the ground segments only
+        common = math.pi * c.diameter * overlap_len * cov
         vol_c = math.pi / 4 * (c.diameter ** 2 - (c.diameter - 2 * c.thickness) ** 2) * c.length
-        vol_g = math.pi / 4 * ((inner_d + 2 * g.thickness) ** 2 - inner_d ** 2) * g.length
+        vol_g = math.pi / 4 * ((inner_d + 2 * g.thickness) ** 2 - inner_d ** 2) * g.length * cov
         if c.length != g.length:
             warnings.append("Axial lengths differ: only the overlapping length counts for wear.")
+        if cov < 1:
+            warnings.append(f"Segmented ground ring: {design.ground_coverage:g} % of the circumference "
+                            "faces the centre sleeve; only this part counts for wear.")
 
     if design.type != "annular" and abs(face_c - face_g) > 1e-9:
         smaller = "centre" if face_c < face_g else "ground"
@@ -85,6 +90,7 @@ def evaluate(design: Design, db: MaterialDatabase) -> DesignResult:
 
     return DesignResult(
         n_gaps=n, common_area=common, total_wear_area=common * n, ground_inner_diameter=inner_d,
+        ground_coverage=design.ground_coverage if design.type == "annular" else None,
         center=res_c, ground=res_g, pm_volume=vol_c + vol_g,
         pm_mass=total(res_c.pm_mass, res_g.pm_mass), pm_cost=total(res_c.pm_cost, res_g.pm_cost),
         warnings=warnings,

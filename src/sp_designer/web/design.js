@@ -20,6 +20,7 @@
       center: electrode({ material_id: "Ir-10Rh", width: 1.5, height: 2.0, thickness: 0.6, cu_core: true }),
       ground: electrode({ material_id: "Ir-10Rh", width: 1.5, height: 2.0, thickness: 0.6 }) } },
     { on: true, design: { name: "Annular Ir / Pt-Ir", type: "annular", gap: 0.3, n_ground: 1,
+      ground_segments: 4, ground_coverage: 80,
       center: electrode({ material_id: "Ir", diameter: 4.0, length: 3.0, thickness: 0.5, cu_core: true }),
       ground: electrode({ material_id: "Pt-10Ir", length: 3.0, thickness: 0.5 }) } },
     { on: false, design: { name: "J-gap rectangular", type: "j_gap", gap: 0.3, n_ground: 1,
@@ -35,6 +36,12 @@
     bound: false,
   };
   const persist = () => save("spd.designSlots", d.slots);
+  // fill fields added in later versions into designs stored in the browser
+  const DESIGN_FIELDS = { gap: 0.3, n_ground: 4, ground_segments: 1, ground_coverage: 100 };
+  d.slots.forEach((s) => {
+    for (const [k, v] of Object.entries(DESIGN_FIELDS)) if (s.design[k] === undefined) s.design[k] = v;
+    for (const side of ["center", "ground"]) s.design[side] = electrode(s.design[side]);
+  });
 
   // ------------------------------------------------------------ relevance of fields
   function fieldApplies(design, side, key) {
@@ -104,8 +111,12 @@
   const GENERAL_ROWS = [
     { group: "General", label: "Spark plug type", unit: "", input: "type", key: "type", applies: () => true },
     { group: "General", label: "Initial gap", unit: "mm", input: "number", key: "gap", applies: () => true },
-    { group: "General", label: "Number of ground electrodes", unit: "–", input: "int", key: "n_ground",
+    { group: "General", label: "Number of ground electrodes", unit: "–", input: "int", key: "n_ground", max: 12,
       applies: (x) => x.type === "multi_pad" },
+    { group: "General", label: "Ground ring segments", unit: "–", input: "int", key: "ground_segments", max: 24,
+      applies: (x) => x.type === "annular" },
+    { group: "General", label: "Ground ring coverage", unit: "%", input: "number", key: "ground_coverage", max: 100,
+      applies: (x) => x.type === "annular" },
   ];
   const GROUPS = ["General", "Centre electrode", "Ground electrode", "Results"];
 
@@ -238,12 +249,13 @@
     const design = s.design;
     if (row.applies && !row.applies(design)) return `<td><div class="val na">–</div></td>`;
     const v = getVal(design, row);
-    const attrs = `data-cell="${s.i}" data-side="${row.side || ""}" data-key="${row.key}" data-input="${row.input}"`;
+    const attrs = `data-cell="${s.i}" data-side="${row.side || ""}" data-key="${row.key}" data-input="${row.input}"`
+      + (row.max ? ` data-max="${row.max}" max="${row.max}"` : "");
     switch (row.input) {
       case "number":
         return `<td><input class="cell-input" type="number" step="0.01" min="0.001" value="${v}" ${attrs}></td>`;
       case "int":
-        return `<td><input class="cell-input" type="number" step="1" min="1" max="12" value="${v}" ${attrs}></td>`;
+        return `<td><input class="cell-input" type="number" step="1" min="1" value="${v}" ${attrs}></td>`;
       case "type":
         return `<td><select class="cell-input" ${attrs}>${Object.entries(TYPE_LABELS).map(([k, t]) => `<option value="${k}" ${k === v ? "selected" : ""}>${t}</option>`).join("")}</select></td>`;
       case "shape":
@@ -331,8 +343,12 @@
       else if (el.dataset.input === "number") value = Number(el.value);
       else if (el.dataset.input === "int") value = Math.round(Number(el.value));
       else value = el.value || null;
-      if ((el.dataset.input === "number" || el.dataset.input === "int") && !(value > 0)) {
-        toast("Please enter a positive number."); el.value = getVal(s.design, row); return;
+      if (el.dataset.input === "number" || el.dataset.input === "int") {
+        const max = el.dataset.max ? Number(el.dataset.max) : Infinity;
+        if (!(value > 0) || value > max) {
+          toast(max < Infinity ? `Please enter a value between 0 and ${max}.` : "Please enter a positive number.");
+          el.value = getVal(s.design, row); return;
+        }
       }
       setVal(s.design, row, value);
       if (row.key === "type" && value === "multi_pad") { s.design.center.shape = "rect"; s.design.ground.shape = "rect"; }
@@ -377,11 +393,30 @@
       const ring = (ro, ri, fill, line) => `<path fill-rule="evenodd" fill="${fill}" stroke="${line}" stroke-width="1.5"
         d="M ${cx - ro * k} ${cy} a ${ro * k} ${ro * k} 0 1 0 ${2 * ro * k} 0 a ${ro * k} ${ro * k} 0 1 0 ${-2 * ro * k} 0 Z
            M ${cx - ri * k} ${cy} a ${ri * k} ${ri * k} 0 1 0 ${2 * ri * k} 0 a ${ri * k} ${ri * k} 0 1 0 ${-2 * ri * k} 0 Z"/>`;
+      // ground ring: n segments, each spanning coverage/n of the circumference, evenly distributed
+      const n = Math.max(1, x.ground_segments || 1);
+      const cov = Math.min(100, Math.max(0, x.ground_coverage ?? 100)) / 100;
+      const pt = (r, a) => `${cx + r * k * Math.cos(a)} ${cy + r * k * Math.sin(a)}`;
+      const sector = (a0, a1, ro, ri) => {
+        const large = a1 - a0 > Math.PI ? 1 : 0;
+        return `M ${pt(ro, a0)} A ${ro * k} ${ro * k} 0 ${large} 1 ${pt(ro, a1)} L ${pt(ri, a1)} A ${ri * k} ${ri * k} 0 ${large} 0 ${pt(ri, a0)} Z`;
+      };
+      const arc = (a0, a1, r) => `M ${pt(r, a0)} A ${r * k} ${r * k} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${pt(r, a1)}`;
+      let groundSvg; let commonSvg;
+      if (cov >= 0.999) {
+        groundSvg = ring(rGo, rGi, "var(--pad-g)", "var(--pad-g-line)");
+        commonSvg = `<circle cx="${cx}" cy="${cy}" r="${rCo * k}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="5 3"/>`;
+      } else {
+        const span = (2 * Math.PI * cov) / n; const pitch = (2 * Math.PI) / n;
+        const segs = [...Array(n).keys()].map((j) => [-Math.PI / 2 + j * pitch - span / 2, -Math.PI / 2 + j * pitch + span / 2]);
+        groundSvg = segs.map(([a0, a1]) => `<path d="${sector(a0, a1, rGo, rGi)}" fill="var(--pad-g)" stroke="var(--pad-g-line)" stroke-width="1.5"/>`).join("");
+        commonSvg = segs.map(([a0, a1]) => `<path d="${arc(a0, a1, rCo)}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="5 3"/>`).join("");
+      }
       return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Annular electrode top view">${hatch}
-        ${ring(rGo, rGi, "var(--pad-g)", "var(--pad-g-line)")}
+        ${groundSvg}
         ${ring(rCo, rCi, "var(--pad-c)", "var(--pad-c-line)")}
-        <circle cx="${cx}" cy="${cy}" r="${rCo * k}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="5 3"/>
-        <text x="${cx}" y="${H - 4}" text-anchor="middle" font-size="11" fill="var(--muted)">Ø ${fmtNum(c.diameter, 2)} · gap ${fmtNum(x.gap, 2)} · overlap L ${fmtNum(Math.min(c.length, g.length), 2)} mm</text>
+        ${commonSvg}
+        <text x="${cx}" y="${H - 4}" text-anchor="middle" font-size="11" fill="var(--muted)">Ø ${fmtNum(c.diameter, 2)} · gap ${fmtNum(x.gap, 2)} · L ${fmtNum(Math.min(c.length, g.length), 2)} mm${cov < 0.999 ? ` · ${n} seg. ${fmtNum(cov * 100, 0)} %` : ""}</text>
       </svg>`;
     }
     const c = x.center; const g = x.ground;

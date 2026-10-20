@@ -89,6 +89,8 @@ def design_rows(designs: list, results: list) -> list[list]:
         ("General", "Spark plug type", "", lambda d, x: PLUG_TYPE_LABELS[d.type]),
         ("General", "Initial gap", "mm", lambda d, x: d.gap),
         ("General", "Number of gaps", "–", lambda d, x: x.n_gaps),
+        ("General", "Ground ring segments", "–", lambda d, x: d.ground_segments if d.type == "annular" else None),
+        ("General", "Ground ring coverage", "%", lambda d, x: d.ground_coverage if d.type == "annular" else None),
     ]
     for side, label in (("center", "Centre electrode"), ("ground", "Ground electrode")):
         spec += [

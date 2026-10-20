@@ -61,7 +61,7 @@ Ratings (oxidation resistance, bead building tendency), wear per cycle (centre a
 
 ## Electrode design
 
-- Three spark plug types: **multi-pad** (rectangular pads, n ground electrodes), **J-gap** (one pair, round or rectangular pads), **annular** (cylindrical faces, radial gap).
+- Three spark plug types: **multi-pad** (rectangular pads, n ground electrodes), **J-gap** (one pair, round or rectangular pads), **annular** (cylindrical faces, radial gap; ground ring closed or segmented with coverage in %). Multi-pad: one centre pad per gap.
 - Per electrode: precious metal, pad dimensions, precious metal thickness, carrier material, Cu core.
 - Results: facing areas, **common wear area = smallest common facing area** (pads centred on a common axis), total wear area, precious metal volume / mass / cost, wearable volume (common area × thickness × gaps).
 - Face-view sketch per variant with the common area hatched; CSV/Excel export; designs can be saved to a local library (used later by the lifetime calculation).

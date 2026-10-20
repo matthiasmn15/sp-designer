@@ -9,6 +9,8 @@ Spark plug types
                precious-metal sleeve on the centre electrode (outer ``diameter``, axial ``length``,
                radial ``thickness``) inside a precious-metal ring on the ground electrode
                (inner diameter = centre diameter + 2 · gap, axial ``length``, radial ``thickness``).
+               The ground ring may be split into ``ground_segments`` segments that together cover
+               ``ground_coverage`` percent of the circumference.
 """
 
 from __future__ import annotations
@@ -47,6 +49,8 @@ class Design(BaseModel):
     type: PlugType = "j_gap"
     gap: float = Field(0.3, gt=0, le=5)  # initial electrode gap
     n_ground: int = Field(4, ge=1, le=12)  # multi_pad only
+    ground_segments: int = Field(1, ge=1, le=24)  # annular only: 1 = closed ring
+    ground_coverage: float = Field(100.0, gt=0, le=100)  # annular only: % of circumference covered
     center: Electrode = Field(default_factory=Electrode)
     ground: Electrode = Field(default_factory=Electrode)
     notes: str | None = None
@@ -74,6 +78,7 @@ class DesignResult(BaseModel):
     common_area: float  # mm² per gap = smallest common facing area (used for wear)
     total_wear_area: float  # mm², common area × number of gaps
     ground_inner_diameter: float | None  # annular only
+    ground_coverage: float | None = None  # annular only, %
     center: ElectrodeResult
     ground: ElectrodeResult
     pm_volume: float

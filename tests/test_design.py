@@ -97,3 +97,19 @@ def test_design_api(client):
     assert x.text.splitlines()[0] == "Group;Parameter;Unit;J"
     assert client.post("/api/designs/export", json={"designs": body, "format": "xlsx"}).status_code == 200
     assert client.delete(f"/api/designs/{saved['id']}").status_code == 204
+
+
+def test_annular_segmented_ground_ring(db):
+    full = Design(type="annular", gap=0.3, center=Electrode(diameter=4.0, length=3.0, thickness=0.5),
+                  ground=Electrode(length=3.0, thickness=0.5))
+    seg = full.model_copy(update={"ground_segments": 4, "ground_coverage": 60.0})
+    r_full, r_seg = evaluate(full, db), evaluate(seg, db)
+    assert r_seg.common_area == pytest.approx(0.6 * r_full.common_area)
+    assert r_seg.ground.pm_volume == pytest.approx(0.6 * r_full.ground.pm_volume)
+    assert r_seg.ground.face_area == pytest.approx(0.6 * r_full.ground.face_area)
+    assert r_seg.center.pm_volume == pytest.approx(r_full.center.pm_volume)  # sleeve is unchanged
+    assert r_seg.center.wearable_volume == pytest.approx(0.6 * r_full.center.wearable_volume)
+    assert r_seg.ground_coverage == 60.0
+    assert any("Segmented ground ring" in w for w in r_seg.warnings)
+    with pytest.raises(ValidationError):
+        Design(type="annular", ground_coverage=120)
