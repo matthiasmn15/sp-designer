@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spark Plug Designer</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/vendor/plotly.min.js" charset="utf-8" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo"><b>SPARK</b>DESIGN</div>
+    <ul class="slot-summary" id="slotSummary"></ul>
+  </div>
+  <div class="toolbar">
+    <div class="tool-group">
+      <span class="tool-label">Comparison set</span>
+      <div class="tool-box">
+        <select id="setSelect" aria-label="Comparison set"></select>
+        <button class="icon-btn" id="setSave" title="Save current selection as set">⤓</button>
+        <button class="icon-btn" id="setDelete" title="Delete set">🗑</button>
+      </div>
+    </div>
+    <div class="tool-group">
+      <span class="tool-label">Export</span>
+      <div class="tool-box">
+        <button class="btn" id="exportCsv">CSV</button>
+        <button class="btn" id="exportXlsx">XLSX</button>
+      </div>
+    </div>
+    <div class="tool-group">
+      <span class="tool-label">Theme</span>
+      <div class="tool-box">
+        <button class="btn theme-btn" data-theme-set="dark">☾ Dark</button>
+        <button class="btn theme-btn" data-theme-set="light">☼ Light</button>
+      </div>
+    </div>
+    <div class="tool-group">
+      <span class="tool-label">&nbsp;</span>
+      <label class="tool-box check"><input type="checkbox" id="explainToggle"> Explain</label>
+    </div>
+    <div class="tool-group">
+      <span class="tool-label">&nbsp;</span>
+      <button class="icon-btn round" id="helpBtn" title="Help">?</button>
+    </div>
+  </div>
+</header>
+
+<div class="notice" id="notice" hidden></div>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="compare">Compare</button>
+  <button class="tab" data-tab="ranking">Ranking</button>
+  <button class="tab" data-tab="charts">Charts</button>
+  <button class="tab" data-tab="database">Database</button>
+  <button class="tab" data-tab="prices">Prices</button>
+  <button class="tab disabled" data-tab="design" title="Next milestone">Electrode design</button>
+</nav>
+
+<main>
+  <!-- COMPARE -->
+  <section class="panel" id="tab-compare">
+    <div class="card">
+      <div class="card-head">
+        <h2>Materials <span id="slotLetters">A / B / C / D</span></h2>
+        <div class="head-actions">
+          <button class="btn outline" id="expandAll">Expand all</button>
+          <button class="btn outline" id="collapseAll">Collapse all</button>
+          <button class="btn outline" id="diffOnly">Differences only (0)</button>
+        </div>
+      </div>
+      <div class="slots" id="slots"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Properties</h2></div>
+      <div class="table-wrap"><table class="ptable" id="propTable"></table></div>
+      <p class="hint">Click a value to edit it. Badges show where a value comes from:
+        <span class="badge o-auto">auto</span> online/bundled database,
+        <span class="badge o-manual">manual</span> reference data,
+        <span class="badge o-user">user</span> your entry,
+        <span class="badge o-estimated">est.</span> estimated from composition,
+        <span class="badge o-derived">derived</span> calculated,
+        <span class="badge o-price">price</span> price module.</p>
+    </div>
+  </section>
+
+  <!-- RANKING -->
+  <section class="panel" id="tab-ranking" hidden>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <h2>Criteria &amp; weights</h2>
+          <div class="head-actions"><button class="btn outline" id="resetWeights">Defaults</button></div>
+        </div>
+        <label class="field inline">Candidates
+          <select id="rankCategory">
+            <option value="precious">Precious metals</option>
+            <option value="carrier">Carrier metals</option>
+            <option value="core">Core materials</option>
+            <option value="all">All materials</option>
+          </select>
+        </label>
+        <div id="weights"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Ranking</h2></div>
+        <div class="table-wrap"><table class="dtable" id="rankTable"></table></div>
+        <p class="hint">Scores are min–max normalised within the candidate set (0–100). Coverage below 100 % means
+          some weighted criteria have no value for that material (e.g. ratings not yet entered) and were skipped.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="panel" id="tab-charts" hidden>
+    <div class="card">
+      <div class="card-head">
+        <h2>Property comparison</h2>
+        <div class="head-actions">
+          <select id="barProp"></select>
+          <select id="barCategory">
+            <option value="precious">Precious metals</option>
+            <option value="carrier">Carrier metals</option>
+            <option value="all">All materials</option>
+          </select>
+        </div>
+      </div>
+      <div class="chart" id="barChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h2>Selection map</h2>
+        <div class="head-actions">
+          <label class="mini">X <select id="mapX"></select></label>
+          <label class="mini"><input type="checkbox" id="mapXLog"> log</label>
+          <label class="mini">Y <select id="mapY"></select></label>
+          <label class="mini"><input type="checkbox" id="mapYLog"> log</label>
+          <select id="mapCategory">
+            <option value="precious">Precious metals</option>
+            <option value="carrier">Carrier metals</option>
+            <option value="all">All materials</option>
+          </select>
+        </div>
+      </div>
+      <div class="chart tall" id="mapChart"></div>
+    </div>
+  </section>
+
+  <!-- DATABASE -->
+  <section class="panel" id="tab-database" hidden>
+    <div class="card">
+      <div class="card-head">
+        <h2>Material database</h2>
+        <div class="head-actions">
+          <input type="search" id="dbSearch" placeholder="Search…">
+          <select id="dbCategory">
+            <option value="all">All categories</option>
+            <option value="precious">Precious metals</option>
+            <option value="carrier">Carrier metals</option>
+            <option value="core">Core materials</option>
+            <option value="alloying">Alloying elements</option>
+          </select>
+          <button class="btn primary" id="addMaterial">+ Add material</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table class="dtable" id="dbTable"></table></div>
+      <p class="hint" id="dataDirHint"></p>
+    </div>
+  </section>
+
+  <!-- PRICES -->
+  <section class="panel" id="tab-prices" hidden>
+    <div class="card">
+      <div class="card-head">
+        <h2>Current prices</h2>
+        <div class="head-actions"><button class="btn primary" id="refreshPrices">Refresh from provider</button></div>
+      </div>
+      <div class="status" id="priceStatus"></div>
+      <div class="table-wrap"><table class="dtable" id="priceTable"></table></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head"><h2>Manual entry</h2></div>
+        <form id="priceForm" class="form-grid">
+          <label class="field">Metal <select name="metal" id="priceMetal"></select></label>
+          <label class="field">Price <input name="value" type="number" step="any" min="0" required></label>
+          <label class="field">Unit
+            <select name="unit"><option>USD/ozt</option><option>USD/g</option></select></label>
+          <label class="field">Date <input name="date" type="date" required></label>
+          <label class="field wide">Source <input name="source" placeholder="e.g. supplier quote"></label>
+          <div class="wide"><button class="btn primary" type="submit">Add price</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Settings</h2></div>
+        <form id="settingsForm" class="form-grid">
+          <label class="field wide">Automatic price provider <select name="price_provider" id="providerSelect"></select></label>
+          <label class="field">Warn when price older than [days] <input name="price_max_age_days" type="number" min="1" required></label>
+          <div class="wide"><button class="btn primary" type="submit">Save settings</button></div>
+        </form>
+        <p class="hint">Automatic prices are indicative. Check the provider's terms of use before relying on them.
+          Metals without automatic prices (e.g. Ni, Cu) can be entered manually.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-design" hidden>
+    <div class="card"><h2>Electrode design</h2><p class="hint">Next milestone.</p></div>
+  </section>
+</main>
+
+<!-- dialogs -->
+<dialog id="editDialog" class="dialog">
+  <form method="dialog" id="editForm">
+    <h2 id="editTitle">Edit material</h2>
+    <p class="hint">Empty fields use the reference value (shown as placeholder). Your entries are stored in your local
+      data folder, not in the repository.</p>
+    <div id="editFields" class="edit-fields"></div>
+    <div class="dialog-actions">
+      <button class="btn outline" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" id="editSave" value="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="addDialog" class="dialog">
+  <form method="dialog" id="addForm">
+    <h2>Add material</h2>
+    <div class="form-grid">
+      <label class="field wide">Name <input name="name" required maxlength="80" placeholder="e.g. Ir-5Rh-1Ru"></label>
+      <label class="field">Kind
+        <select name="kind" id="addKind"><option value="alloy">Alloy</option><option value="element">Element / other</option></select></label>
+      <fieldset class="field">Categories
+        <label><input type="checkbox" name="cat" value="precious" checked> precious</label>
+        <label><input type="checkbox" name="cat" value="carrier"> carrier</label>
+        <label><input type="checkbox" name="cat" value="core"> core</label>
+      </fieldset>
+      <label class="field wide">Description <input name="description"></label>
+    </div>
+    <div id="compBlock">
+      <h3>Composition [mass %]</h3>
+      <div id="compRows"></div>
+      <button class="btn outline" type="button" id="addCompRow">+ Constituent</button>
+    </div>
+    <p class="error" id="addError"></p>
+    <div class="dialog-actions">
+      <button class="btn outline" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="save">Create</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="historyDialog" class="dialog">
+  <form method="dialog">
+    <h2 id="historyTitle">Price history</h2>
+    <div class="table-wrap"><table class="dtable" id="historyTable"></table></div>
+    <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
+  </form>
+</dialog>
+
+<dialog id="helpDialog" class="dialog">
+  <form method="dialog">
+    <h2>Spark Plug Designer – Materials</h2>
+    <ul class="help">
+      <li><b>Compare</b>: pick up to four materials (A–D) and compare all properties side by side.</li>
+      <li><b>Ranking</b>: weight the selection criteria; materials are scored within the candidate set.</li>
+      <li><b>Charts</b>: bar chart per property and a selection map (e.g. erosion indicator vs. cost per volume).</li>
+      <li><b>Database</b>: add own materials and alloys, override reference values.</li>
+      <li><b>Prices</b>: automatic indicative prices with date stamp, or manual entries.</li>
+      <li>Pure-element data is imported automatically from the bundled <i>mendeleev</i> database.
+        Alloy properties without datasheet values are estimated from the composition.</li>
+    </ul>
+    <p class="hint" id="helpInfo"></p>
+    <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

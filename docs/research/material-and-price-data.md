@@ -30,16 +30,17 @@ Status: initial survey, 2026-10-20.
 | MetalpriceAPI | ✓ | ✓ | ? | ? | ? | ? | Free tier, limits not stated |
 | Metals-API | ✓ | ✓ | ✓* | ? | ✓* | ✓ (LME) | *advertised; needs verification with the symbols list |
 | Johnson Matthey | – | – | – | – | – | – | Publishes supply/demand data, not a price feed |
+| **Umicore PMM** | ✓ | ✓ | ✓ | ✓ | ✓ | – | Indicative daily prices; CSV export per metal (`/api/chart/export/csv/{code}/{from}/{to}/AMUS/`); terms of use to be checked |
 
 **Findings**
 - Pt, Pd, Rh and Ni prices are readily available via free APIs.
-- **Ir and Ru** are thinly traded; free API coverage is uncertain → manual input will likely be needed.
+- **Ir and Ru** are thinly traded and missing from most free APIs; Umicore PMM publishes indicative prices for them.
 - Prices are in USD per troy ounce; conversion to €/g (or user-chosen currency) is needed.
 
 **Recommendation**
 - Price provider interface with a configurable API provider (API key stored locally, never committed) and **manual entry with date stamp** as fallback per metal.
 - Show price age in the UI; warn when a price is older than a configurable threshold.
-- Decision on provider after testing Ir/Ru coverage with a free key.
+- **Implemented (milestone 1):** Umicore PMM provider for Pt, Pd, Rh, Ir, Ru (can be switched off); manual dated entries for all other metals (e.g. Ni, Cu). The CSV parser is format-tolerant because the export format could not be verified from the development environment.
 
 ## Sources
 - mendeleev on PyPI: https://pypi.org/project/mendeleev
@@ -49,4 +50,5 @@ Status: initial survey, 2026-10-20.
 - Metals.Dev: https://metals.dev/
 - MetalpriceAPI: https://metalpriceapi.com/
 - Metals-API documentation: https://metals-api.com/documentation
+- Umicore PMM prices: https://pmm.umicore.com/en/prices/
 - Johnson Matthey PGM market data: https://matthey.com/products-and-markets/pgms-and-circularity/pgm-market-data

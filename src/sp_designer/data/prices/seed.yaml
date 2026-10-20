@@ -1,0 +1,21 @@
+# Seed prices (USD per troy ounce). Used until newer prices are fetched or entered manually.
+- metal: Pt
+  value: 1641.0
+  date: "2026-10-19"
+  source: "Umicore PMM price page (indicative)"
+- metal: Pd
+  value: 1124.0
+  date: "2026-10-19"
+  source: "Umicore PMM price page (indicative)"
+- metal: Rh
+  value: 9100.0
+  date: "2026-10-19"
+  source: "Umicore PMM price page (indicative)"
+- metal: Ir
+  value: 9200.0
+  date: "2026-10-19"
+  source: "Umicore PMM price page (indicative)"
+- metal: Ru
+  value: 1900.0
+  date: "2026-10-19"
+  source: "Umicore PMM price page (indicative)"
