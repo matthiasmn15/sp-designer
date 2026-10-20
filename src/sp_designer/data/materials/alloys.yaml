@@ -1,0 +1,60 @@
+# Alloys. Composition in mass fractions (normalised automatically).
+# Properties not given here are estimated from the constituents (origin "estimated"):
+#   density: inverse rule of mixtures, specific heat / heat of fusion / melting point: mass-weighted,
+#   thermal expansion: volume-weighted. Thermal conductivity and work function are NOT estimated,
+#   because alloying changes them strongly; enter datasheet values instead.
+# Precious-metal alloys below are generic examples; replace or extend with your own grades.
+
+- id: Ir-10Rh
+  name: Ir-10Rh
+  kind: alloy
+  categories: [precious]
+  composition: {Ir: 0.90, Rh: 0.10}
+  description: "Generic example Ir-Rh alloy (mass %). Properties estimated."
+
+- id: Ir-2Rh
+  name: Ir-2Rh
+  kind: alloy
+  categories: [precious]
+  composition: {Ir: 0.98, Rh: 0.02}
+  description: "Generic example Ir-Rh alloy (mass %). Properties estimated."
+
+- id: Pt-10Ir
+  name: Pt-10Ir
+  kind: alloy
+  categories: [precious]
+  composition: {Pt: 0.90, Ir: 0.10}
+  description: "Generic example Pt-Ir alloy (mass %). Properties estimated."
+
+- id: Pt-5Ni
+  name: Pt-5Ni
+  kind: alloy
+  categories: [precious]
+  composition: {Pt: 0.95, Ni: 0.05}
+  description: "Generic example Pt-Ni alloy (mass %). Properties estimated."
+
+- id: Alloy-600
+  name: Alloy 600 (Ni-Cr-Fe)
+  kind: alloy
+  categories: [carrier]
+  composition: {Ni: 0.765, Cr: 0.155, Fe: 0.08}
+  description: "Ni-Cr-Fe alloy, INCONEL® 600 type. Nominal composition."
+  properties:
+    density: {value: 8470, source: "Special Metals, INCONEL alloy 600 datasheet"}
+    melting_point: {value: 1354, source: "Special Metals, INCONEL alloy 600 datasheet", note: "melting range 1354–1413 °C; solidus used"}
+    thermal_conductivity: {value: 14.9, source: "Special Metals, INCONEL alloy 600 datasheet", note: "at 21 °C"}
+    specific_heat: {value: 444, source: "Special Metals, INCONEL alloy 600 datasheet", note: "at 21 °C"}
+    thermal_expansion: {value: 13.3, source: "Special Metals, INCONEL alloy 600 datasheet", note: "mean, 21–100 °C"}
+
+- id: Alloy-601
+  name: Alloy 601 (Ni-Cr-Fe-Al)
+  kind: alloy
+  categories: [carrier]
+  composition: {Ni: 0.605, Cr: 0.23, Fe: 0.151, Al: 0.014}
+  description: "Ni-Cr-Fe-Al alloy, INCONEL® 601 type. Nominal composition."
+  properties:
+    density: {value: 8110, source: "Special Metals, INCONEL alloy 601 datasheet"}
+    melting_point: {value: 1360, source: "Special Metals, INCONEL alloy 601 datasheet", note: "melting range 1360–1411 °C; solidus used"}
+    thermal_conductivity: {value: 11.2, source: "Special Metals, INCONEL alloy 601 datasheet", note: "at 21 °C"}
+    specific_heat: {value: 448, source: "Special Metals, INCONEL alloy 601 datasheet", note: "at 21 °C"}
+    thermal_expansion: {value: 13.75, source: "Special Metals, INCONEL alloy 601 datasheet", note: "mean, 21–100 °C"}

@@ -1,0 +1,92 @@
+# Pure elements.
+# Density, melting point, thermal conductivity, specific heat and heat of fusion are
+# imported automatically from the mendeleev package at load time (origin "auto").
+# Values listed here are manual entries (origin "manual") and take precedence over auto values.
+# Ratings (oxidation resistance, bead tendency) and erosion coefficients are intentionally left
+# empty: they must come from your own experience or calibration data.
+
+- id: Ir
+  name: Iridium
+  symbol: Ir
+  kind: element
+  categories: [precious]
+  properties:
+    thermal_expansion: {value: 6.4, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+    work_function: {value: 5.27, source: "CRC Handbook of Chemistry and Physics", note: "polycrystalline; 5.00–5.67 eV depending on crystal face"}
+
+- id: Pt
+  name: Platinum
+  symbol: Pt
+  kind: element
+  categories: [precious]
+  properties:
+    thermal_expansion: {value: 8.8, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+    work_function: {value: 5.65, source: "CRC Handbook of Chemistry and Physics", note: "polycrystalline; 5.12–5.93 eV depending on crystal face"}
+
+- id: Ru
+  name: Ruthenium
+  symbol: Ru
+  kind: element
+  categories: [precious]
+  properties:
+    thermal_expansion: {value: 6.4, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+    work_function: {value: 4.71, source: "CRC Handbook of Chemistry and Physics", note: "polycrystalline"}
+
+- id: Rh
+  name: Rhodium
+  symbol: Rh
+  kind: element
+  categories: [precious]
+  properties:
+    thermal_expansion: {value: 8.2, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+    work_function: {value: 4.98, source: "CRC Handbook of Chemistry and Physics", note: "polycrystalline"}
+
+- id: Pd
+  name: Palladium
+  symbol: Pd
+  kind: element
+  categories: [precious]
+  properties:
+    thermal_expansion: {value: 11.8, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+
+- id: Ni
+  name: Nickel
+  symbol: Ni
+  kind: element
+  categories: [carrier, alloying]
+  properties:
+    thermal_expansion: {value: 13.4, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+    work_function: {value: 5.15, source: "CRC Handbook of Chemistry and Physics", note: "polycrystalline; 5.04–5.35 eV depending on crystal face"}
+
+- id: Cu
+  name: Copper
+  symbol: Cu
+  kind: element
+  categories: [core]
+  properties:
+    thermal_expansion: {value: 16.5, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+    work_function: {value: 4.65, source: "CRC Handbook of Chemistry and Physics", note: "polycrystalline; 4.53–5.10 eV depending on crystal face"}
+
+- id: Cr
+  name: Chromium
+  symbol: Cr
+  kind: element
+  categories: [alloying]
+  properties:
+    thermal_expansion: {value: 4.9, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+
+- id: Fe
+  name: Iron
+  symbol: Fe
+  kind: element
+  categories: [alloying]
+  properties:
+    thermal_expansion: {value: 11.8, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}
+
+- id: Al
+  name: Aluminium
+  symbol: Al
+  kind: element
+  categories: [alloying]
+  properties:
+    thermal_expansion: {value: 23.1, source: "CRC Handbook of Chemistry and Physics", note: "at 25 °C"}

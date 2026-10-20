@@ -22,7 +22,12 @@ Spark Plug Designer helps design engineers create and compare spark plug design 
 ## 3. Inputs
 
 ### 3.1 Spark plug design
-- Electrode configuration (e.g. J-gap, multi-ground-electrode, pre-chamber – extensible)
+- Electrode configuration – three types in the first version (extensible later):
+  1. **Multi-pad:** several rectangular precious-metal pads facing each other (centre electrode vs. several ground electrodes)
+  2. **J-gap:** one electrode pair; pads round (disc) or rectangular
+  3. **Annular / cylindrical:** circular electrodes whose cylindrical surfaces face each other (radial gap)
+- Precious metal per pad: material and **thickness** (pad dimensions per type)
+- **Wear area rule:** if the facing areas of ground and centre electrode differ, the **smallest common (overlapping) area** is used for wear calculations
 - Centre and ground electrode geometry: pad/tip diameter, length, thickness, shape
 - Electrode gap (initial)
 - Precious metal per electrode (pad/tip material)
