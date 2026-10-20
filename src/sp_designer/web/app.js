@@ -176,6 +176,9 @@ function applyRoute(hash) {
   $$(".page").forEach((p) => { p.hidden = p.dataset.page !== page; });
   $$("[data-subnav]").forEach((n) => { n.hidden = n.dataset.subnav !== page; });
   $$(".materials-only").forEach((el) => { el.hidden = page !== "materials"; });
+  $$(".export-group").forEach((el) => { el.hidden = !["materials", "design"].includes(page); });
+  document.body.dataset.page = page;
+  if (page === "design" && window.designPage) window.designPage.show();
   const nav = $(`[data-subnav="${page}"]`);
   if (nav) {
     const sub = $(`.tab[data-tab="${subRaw}"]`, nav) ? subRaw : DEFAULT_SUB[page];
@@ -192,6 +195,7 @@ function activeSlots() {
 }
 
 function exportComparison(format) {
+  if (document.body.dataset.page === "design" && window.designPage) { window.designPage.exportDesigns(format); return; }
   const ids = activeSlots().map((s) => s.id);
   if (!ids.length) { toast("Select at least one material in A–D."); return; }
   window.location.href = `/api/export?format=${format}&ids=${encodeURIComponent(ids.join(","))}`;

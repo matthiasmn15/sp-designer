@@ -9,8 +9,8 @@ See `docs/` for requirements and research.
 | Milestone | State |
 |---|---|
 | 1. Material database + selection aid | ✅ first version |
-| 2. Electrode design (multi-pad, J-gap, annular) with precious metal selection and thickness | next |
-| 3. Lifetime and re-gap estimation | planned |
+| 2. Electrode design (multi-pad, J-gap, annular) with precious metal selection and thickness | ✅ first version |
+| 3. Lifetime | next |
 | 4. 0-D spark model | planned |
 
 ## Run locally
@@ -31,7 +31,7 @@ Run the tests with `pytest`.
 | Page | Content |
 |---|---|
 | 1 Materials | Compare · Ranking · Charts · Database · Prices |
-| 2 Electrode design | spark plug type, precious metal and thickness per electrode (next) |
+| 2 Electrode design | design variants A–D, precious metal and thickness per electrode, facing areas, design library |
 | 3 Lifetime | design/material combinations, wear per cycle, voltage vs. gap (planned) |
 | 4 Spark simulation | 0-D / 1-D spark models (planned / research) |
 
@@ -59,6 +59,13 @@ Computed values: `derived` (melt energy density ρ·(c_p·(T_m − 25 °C) + h_f
 
 Ratings (oxidation resistance, bead building tendency), wear per cycle (centre and ground electrode, µm³/cycle) and the erosion coefficient are intentionally empty – enter them from your own experience or calibration.
 
+## Electrode design
+
+- Three spark plug types: **multi-pad** (rectangular pads, n ground electrodes), **J-gap** (one pair, round or rectangular pads), **annular** (cylindrical faces, radial gap).
+- Per electrode: precious metal, pad dimensions, precious metal thickness, carrier material, Cu core.
+- Results: facing areas, **common wear area = smallest common facing area** (pads centred on a common axis), total wear area, precious metal volume / mass / cost, wearable volume (common area × thickness × gaps).
+- Face-view sketch per variant with the common area hatched; CSV/Excel export; designs can be saved to a local library (used later by the lifetime calculation).
+
 ### User data and confidentiality
 
-Overrides, own materials, fetched prices and settings are stored in `~/.sp-designer/` (change with the `SPD_DATA_DIR` environment variable) – **outside the repository**, so confidential values are never committed.
+Overrides, own materials, saved designs, fetched prices and settings are stored in `~/.sp-designer/` (change with the `SPD_DATA_DIR` environment variable) – **outside the repository**, so confidential values are never committed.

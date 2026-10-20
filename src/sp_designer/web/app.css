@@ -315,3 +315,32 @@ fieldset.field label { color: var(--text); font-weight: 400; margin-right: 10px;
   padding: 10px 18px; border-radius: 12px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.2);
 }
 .page:not([data-page="materials"]) { padding-top: 22px; }
+
+/* ---------- electrode design ---------- */
+.slot input.slot-name {
+  flex: 1; min-width: 0; font-weight: 600; background: transparent; border: 1px solid transparent;
+  border-radius: 8px; padding: 2px 6px;
+}
+.slot input.slot-name:hover, .slot input.slot-name:focus { border-color: var(--input-border); background: var(--input); }
+.slot-row + .slot-row { margin-top: 8px; }
+.cell-input {
+  width: 100%; min-width: 150px; min-height: 36px; text-align: center; background: var(--input);
+  border: 1px solid var(--input-border); border-radius: var(--radius); padding: 4px 10px; font-variant-numeric: tabular-nums;
+}
+.cell-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+select.cell-input { text-align-last: center; }
+.cell-check { display: flex; justify-content: center; align-items: center; min-height: 36px; }
+.val.na { color: var(--muted); background: transparent; border-style: dashed; opacity: 0.6; }
+.val.result { font-weight: 600; }
+.val.warning { justify-content: flex-start; text-align: left; font-size: 12px; font-weight: 400; color: var(--warn); white-space: normal; padding: 6px 10px; }
+.sketches { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.sketch { border: 1px solid var(--border); border-top: 3px solid var(--slot-color); border-radius: 16px; padding: 12px 14px; }
+.sketch h4 { margin: 0 0 4px; font-size: 14px; }
+.sketch .sub { color: var(--muted); font-size: 12px; }
+.sketch svg { width: 100%; height: auto; display: block; margin-top: 6px; }
+.legend { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.lg { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-left: 8px; }
+.lg-c { background: var(--pad-c); }
+.lg-g { background: var(--pad-g); }
+.lg-x { background: repeating-linear-gradient(45deg, var(--accent) 0 2px, transparent 2px 5px); border: 1px solid var(--accent); }
+:root { --pad-c: rgba(79, 143, 247, 0.35); --pad-c-line: #3f7fd9; --pad-g: rgba(226, 150, 60, 0.35); --pad-g-line: #c27a16; }

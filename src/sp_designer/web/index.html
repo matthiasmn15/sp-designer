@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/static/app.css">
   <script src="/vendor/plotly.min.js" charset="utf-8" defer></script>
   <script src="/static/app.js" defer></script>
+  <script src="/static/design.js" defer></script>
 </head>
 <body>
 <header class="topbar">
@@ -23,7 +24,7 @@
         <button class="icon-btn" id="setDelete" title="Delete set">🗑</button>
       </div>
     </div>
-    <div class="tool-group materials-only">
+    <div class="tool-group export-group">
       <span class="tool-label">Export</span>
       <div class="tool-box">
         <button class="btn" id="exportCsv">CSV</button>
@@ -215,24 +216,34 @@
 
 </div>
 
-<!-- ELECTRODE DESIGN (milestone 2) -->
+<!-- ELECTRODE DESIGN -->
 <div class="page" data-page="design" hidden>
-  <div class="card planned">
-    <div class="card-head"><h2>Electrode design</h2><span class="pill-planned">Milestone 2 – next</span></div>
-    <div class="planned-grid">
-      <div><h3>Spark plug types</h3><ul>
-        <li><b>Multi-pad</b> – several rectangular precious-metal pads facing each other</li>
-        <li><b>J-gap</b> – one electrode pair, round or rectangular pads</li>
-        <li><b>Annular</b> – circular electrodes, cylindrical surfaces facing each other</li></ul></div>
-      <div><h3>Per electrode</h3><ul>
-        <li>Precious metal (from the material database) and thickness</li>
-        <li>Pad dimensions, carrier material, optional Cu core</li>
-        <li>Initial gap</li></ul></div>
-      <div><h3>Results</h3><ul>
-        <li>Facing areas; wear area = smallest common area of centre and ground electrode</li>
-        <li>Precious metal volume, mass and cost per plug</li>
-        <li>Side-by-side comparison of design variants</li></ul></div>
+  <div class="card">
+    <div class="card-head">
+      <h2>Design variants <span id="dSlotLetters">A / B / C / D</span></h2>
+      <div class="head-actions">
+        <button class="btn outline" id="dExpandAll">Expand all</button>
+        <button class="btn outline" id="dCollapseAll">Collapse all</button>
+        <button class="btn outline" id="dDiffOnly">Differences only (0)</button>
+        <button class="btn outline" id="dLibrary">Library</button>
+      </div>
     </div>
+    <div class="slots" id="designSlots"></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Parameters &amp; results</h2></div>
+    <div class="table-wrap"><table class="ptable" id="designTable"></table></div>
+    <p class="hint">All lengths in mm. Pads are assumed to be centred on a common axis. If the facing areas of centre
+      and ground electrode differ, the <b>smallest common area</b> is used for wear. <i>Wearable volume</i> is the
+      precious metal inside the common wear area (common area × thickness × number of gaps).</p>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <h2>Facing areas</h2>
+      <div class="legend"><span class="lg lg-c"></span>centre electrode <span class="lg lg-g"></span>ground electrode
+        <span class="lg lg-x"></span>common wear area</div>
+    </div>
+    <div class="sketches" id="designSketches"></div>
   </div>
 </div>
 
@@ -336,6 +347,15 @@
         Alloy properties without datasheet values are estimated from the composition.</li>
     </ul>
     <p class="hint" id="helpInfo"></p>
+    <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
+  </form>
+</dialog>
+
+<dialog id="libraryDialog" class="dialog">
+  <form method="dialog">
+    <h2>Design library</h2>
+    <p class="hint">Saved designs are stored in your local data folder and will be available for the lifetime calculation.</p>
+    <div class="table-wrap"><table class="dtable" id="libraryTable"></table></div>
     <div class="dialog-actions"><button class="btn primary" value="close">Close</button></div>
   </form>
 </dialog>
