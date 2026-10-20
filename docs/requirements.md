@@ -66,6 +66,13 @@ erosion per spark (material, energy, polarity, temperature, flow)
 - **Re-gappable plugs:** the re-gap interval is defined by the **voltage limit** (required voltage reaches available voltage minus reserve). The **lifetime** is limited by **wear** (minimum remaining electrode/precious-metal volume), across all re-gap cycles.
 - **Non-re-gappable plugs:** lifetime is the earlier of the voltage limit and the wear limit.
 
+### 4.2a Lifetime page (first version)
+- Evaluates **combinations** of electrode designs and materials side by side.
+- Wear input: **wear per cycle per material**, entered separately for use on the **centre** and the **ground** electrode (polarity effect). Manual values first; later calculated by the wear model (§4.4, §6).
+- Wear volume is applied to the **smallest common facing area** of centre and ground electrode (§3.1) to obtain gap growth.
+- Ignition voltage vs. gap: **manual table** for now; later replaced by the Paschen-type breakdown model.
+- Result: gap and ignition voltage over operating hours, re-gap interval (voltage limit), lifetime (wear limit), remaining precious metal and cost per operating hour.
+
 ### 4.3 Economics
 - Precious metal mass per plug (from geometry and density)
 - Spark plug material cost (precious metal + carrier) using current metal prices
@@ -88,7 +95,8 @@ erosion per spark (material, energy, polarity, temperature, flow)
 - Thermal expansion (mismatch between pad and carrier is critical for joint integrity)
 - Oxidation resistance
 - Work function
-- Spark erosion rate (calibratable coefficient)
+- Wear per cycle, separately for centre and ground electrode (manual now, calculated later)
+- Spark erosion coefficient K (for the later calculated wear model)
 - **Bead building tendency** = metal bead formation that bridges the gap; qualitative rating 1–5
 - Price (with date stamp and source)
 
@@ -111,7 +119,18 @@ See `docs/research/spark-simulation.md` for the model survey and recommendation.
 - Calibration and test data live outside version control (e.g. `data/confidential/`, git-ignored, or a user-configured path).
 - The repository contains only code, public reference data and synthetic example data.
 
-## 8. Milestones
+## 8. Application structure and milestones
+
+Main pages of the web UI:
+
+| Page | Sub-pages / content |
+|---|---|
+| 1 Materials | Compare, Ranking, Charts, Database, Prices |
+| 2 Electrode design | Spark plug type, precious metal and thickness per electrode, variant comparison |
+| 3 Lifetime | Design/material combinations, wear per cycle, voltage vs. gap, gap and voltage over hours |
+| 4 Spark simulation | 0-D / 1-D spark models (research) |
+
+Milestones:
 
 1. **Material database + selection aid** – element/alloy data, automatic import with manual override, price feed, comparison and ranking view.
 2. **Design configurator** – geometry and materials, precious metal mass, cost.
@@ -120,6 +139,6 @@ See `docs/research/spark-simulation.md` for the model survey and recommendation.
 5. **Research track** – 1-D channel model (stretching, restrike), optional CFD coupling.
 
 ## 9. Open items
-- Exact list of electrode configurations for the first configurator version
 - Format of confidential calibration data (to define the import interface)
-- Choice of price feed provider (needs Ir and Ru coverage – see research doc)
+- Umicore price feed: verify CSV format and terms of use on a local machine
+- Unit of wear per cycle (µm³/cycle assumed) and whether wear depends on operating point

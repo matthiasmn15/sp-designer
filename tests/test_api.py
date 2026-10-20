@@ -63,3 +63,13 @@ def test_settings_roundtrip(client):
     r = client.put("/api/settings", json={"price_provider": "none", "price_max_age_days": 7})
     assert r.json()["price_max_age_days"] == 7
     assert client.post("/api/prices/refresh").status_code == 400
+
+
+def test_wear_per_cycle_is_editable_per_electrode(client):
+    r = client.put("/api/materials/Ir/properties", json={
+        "wear_center": {"value": 12.5, "source": "endurance test"},
+        "wear_ground": {"value": 20.0, "source": "endurance test"},
+    })
+    props = r.json()["properties"]
+    assert props["wear_center"]["value"] == 12.5 and props["wear_center"]["origin"] == "user"
+    assert props["wear_ground"]["value"] == 20.0

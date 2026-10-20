@@ -26,6 +26,17 @@ The app opens at <http://127.0.0.1:8765/>. Options: `--port`, `--host`, `--no-br
 
 Run the tests with `pytest`.
 
+## Application structure
+
+| Page | Content |
+|---|---|
+| 1 Materials | Compare · Ranking · Charts · Database · Prices |
+| 2 Electrode design | spark plug type, precious metal and thickness per electrode (next) |
+| 3 Lifetime | design/material combinations, wear per cycle, voltage vs. gap (planned) |
+| 4 Spark simulation | 0-D / 1-D spark models (planned / research) |
+
+Pages and sub-pages can be bookmarked (e.g. `#materials/ranking`).
+
 ## Material module
 
 - **Compare**: up to four materials (A–D) side by side; differences-only view; click a value to override it.
@@ -46,7 +57,7 @@ Every value carries an origin, source and date. Precedence (highest first):
 
 Computed values: `derived` (melt energy density ρ·(c_p·(T_m − 25 °C) + h_f), cost per volume) and `price`.
 
-Ratings (oxidation resistance, bead building tendency) and the erosion coefficient are intentionally empty – enter them from your own experience or calibration.
+Ratings (oxidation resistance, bead building tendency), wear per cycle (centre and ground electrode, µm³/cycle) and the erosion coefficient are intentionally empty – enter them from your own experience or calibration.
 
 ### User data and confidentiality
 
