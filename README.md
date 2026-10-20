@@ -18,8 +18,8 @@ See `docs/` for requirements and research.
 Requires Python ≥ 3.11.
 
 ```bash
-pip install -e ".[dev]"
-sp-designer            # or: python -m sp_designer
+python -m pip install -e ".[dev]"   # Windows: py -m pip install -e ".[dev]"
+python -m sp_designer
 ```
 
 The app opens at <http://127.0.0.1:8765/>. Options: `--port`, `--host`, `--no-browser`.
